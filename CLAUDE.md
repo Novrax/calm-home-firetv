@@ -30,7 +30,10 @@ sideloaded apps onto a Fire Stick before. Git, adb, Android builds and Claude Co
 5. **Be straight about what Amazon blocks.** If something isn't possible on his firmware, say so and give the closest alternative.
    Amazon's own launcher can't be removed; Calm Home redirects away from it instead (see "What Amazon blocks" below).
 6. **Downloads:** say what you're about to download and from where before you do it (winget packages, the Android SDK zip).
-7. **Keep his private details out of anything shared.** Wi-Fi passwords, his IP address and his `CHANGES.md` stay local.
+7. **Leave his own apps alone.** Apps he installed himself (IPTV players, sideloaded apps and so on) are never uninstalled,
+   disabled or background-restricted unless he asks. RECIPE Phases 2 and 3 only cover the Amazon packages they name.
+   Do offer them as Home tiles in step 5 and include them in the Phase 4 compile.
+8. **Keep his private details out of anything shared.** Wi-Fi passwords, his IP address and his `CHANGES.md` stay local.
    `.gitignore` already covers `.stick`, `CHANGES.md` and `launcher/signing.jks`.
 
 ## How to tell where things stand
@@ -158,6 +161,7 @@ When he comes back:
 | Worked yesterday, can't connect today | The stick's IP changed. Read it again from About → Network, update `.stick`. Suggest a DHCP reservation. |
 | Home button shows Amazon's home again | Fire OS sometimes turns accessibility off after an update. Re-run the HomeGuard lines of RECIPE Phase 1. |
 | No internet at all after the TV was off | Phase 5 DNS plus USB power. DnsWatch should recover on its own; if not, turn Private DNS off (RECIPE Phase 5 undo) and recommend the wall adapter. |
+| An app (often IPTV) won't load streams or log in | If Phase 5 ad-blocking DNS is on, it's probably blocking that service's servers. Turn Private DNS off first (RECIPE Phase 5 undo), log it, and check again before looking anywhere else. |
 | A Fire OS update undid some changes | Re-check `pm list packages -d` against `CHANGES.md` and re-apply what's missing, logging each. |
 | Install fails with a signature error | The APK was signed with a different key. Use the original `launcher/signing.jks`, or `a uninstall tv.calm.home` and reinstall (this resets Home's tile order and needs the Phase 1 grants again). |
 

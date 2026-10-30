@@ -166,6 +166,8 @@ a shell settings put global private_dns_mode hostname
 
 Undo: `a shell settings put global private_dns_mode off` and `a shell settings delete global private_dns_specifier`.
 
+Ad-blocking DNS can block servers that IPTV and some streaming apps rely on. If one stops loading after this, undo this phase first.
+
 Warning, learned the hard way: if the stick is powered from the **TV's USB port**, it cold-boots every time the TV turns off,
 its clock starts wrong, AdGuard's certificate looks invalid and *all* internet breaks. Calm Home's DnsWatch detects that and falls
 back to the router's DNS automatically, but the real fix is powering the stick from the wall adapter. Ask how it's powered first.
