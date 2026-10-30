@@ -1,0 +1,12 @@
+# Build output
+launcher/out/
+*.idsig
+
+# Each person's own signing key. build.ps1 makes one on first build.
+# Keep yours backed up: without it, updates won't install over the app already on the TV.
+launcher/signing.jks
+
+# Personal to each setup: the stick's address, the device change log, session notes
+.stick
+CHANGES.md
+HANDOFF.md

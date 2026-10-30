@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Home</string>
+    <string name="guard_name">Home button guard</string>
+    <string name="guard_desc">Sends the Home button to your own home screen instead of Amazon\'s.</string>
+</resources>

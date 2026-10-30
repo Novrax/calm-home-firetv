@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aerial Gallery</title>
+<style>
+  :root {
+    --bg: #0b0b0f; --panel: #16161c; --panel-2: #1f1f27; --line: #2c2c36;
+    --text: #f5f5f7; --muted: #9a9aa6; --accent: #4fa3ff; --add: #34c77b; --remove: #ff6b5e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 14px/1.45 -apple-system, "Segoe UI", system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: rgba(11,11,15,.92);
+           backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); padding: 16px 24px 12px; }
+  h1 { margin: 0; font-size: 20px; font-weight: 600; }
+  .sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+  .chip { border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 999px;
+          padding: 6px 13px; font: inherit; font-size: 13px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--text); color: #0b0b0f; border-color: var(--text); }
+  .chip .n { opacity: .55; margin-left: 4px; }
+  input[type=search] { margin-left: auto; min-width: 200px; background: var(--panel); border: 1px solid var(--line);
+         color: var(--text); border-radius: 999px; padding: 7px 14px; font: inherit; }
+  main { padding: 20px 24px 120px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+          display: flex; flex-direction: column; transition: transform .15s, border-color .15s; }
+  .card:hover { transform: translateY(-2px); border-color: #45455a; }
+  .card.want { border-color: var(--add); }
+  .card.drop { border-color: var(--remove); opacity: .75; }
+  .thumb { position: relative; aspect-ratio: 16/9; background: linear-gradient(135deg, #2b3e4a, #141e28);
+           border: 0; padding: 0; cursor: pointer; display: block; width: 100%; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb .play { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0;
+                 background: rgba(0,0,0,.35); transition: opacity .15s; font-size: 30px; color: #fff; }
+  .thumb:hover .play, .thumb:focus-visible .play { opacity: 1; }
+  .badge { position: absolute; top: 8px; left: 8px; font-size: 10px; font-weight: 600; letter-spacing: .08em;
+           padding: 3px 7px; border-radius: 6px; background: rgba(0,0,0,.55); color: #fff; }
+  .badge.tv { background: #f5f5f7; color: #0b0b0f; }
+  .meta { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .title { font-weight: 600; font-size: 14.5px; }
+  .cap { color: var(--muted); font-size: 12.5px; flex: 1; }
+  .toggle { margin-top: 8px; align-self: flex-start; border-radius: 999px; padding: 5px 12px; font: inherit;
+            font-size: 12.5px; cursor: pointer; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); }
+  .want .toggle { background: var(--add); border-color: var(--add); color: #06210f; }
+  .drop .toggle { background: transparent; border-color: var(--remove); color: var(--remove); }
+  .empty { color: var(--muted); text-align: center; padding: 60px 0; }
+
+  footer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: rgba(22,22,28,.96);
+           backdrop-filter: blur(14px); border-top: 1px solid var(--line); padding: 12px 24px;
+           display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .sum { flex: 1; min-width: 220px; font-size: 13px; color: var(--muted); }
+  .sum b { color: var(--text); }
+  .btn { border-radius: 999px; padding: 8px 16px; font: inherit; font-weight: 600; cursor: pointer;
+         border: 1px solid var(--line); background: var(--panel-2); color: var(--text); }
+  .btn.primary { background: var(--text); color: #0b0b0f; border-color: var(--text); }
+  .btn:disabled { opacity: .4; cursor: default; }
+
+  dialog { border: 0; padding: 0; background: #000; color: var(--text); width: min(1200px, 94vw);
+           border-radius: 16px; overflow: hidden; }
+  dialog::backdrop { background: rgba(0,0,0,.8); }
+  dialog video { width: 100%; aspect-ratio: 16/9; display: block; background: #000; }
+  .vbar { display: flex; gap: 10px; align-items: center; padding: 12px 16px; background: var(--panel); flex-wrap: wrap; }
+  .vbar .info { flex: 1; min-width: 200px; }
+  .vbar .info small { color: var(--muted); display: block; }
+  .note { color: var(--muted); font-size: 12px; padding: 0 16px 12px; background: var(--panel); }
+
+  @media (max-width: 600px) {
+    header, main, footer { padding-left: 16px; padding-right: 16px; }
+    input[type=search] { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Aerial Gallery</h1>
+  <div class="sub">Every Apple TV Aerial on Apple's servers. Click a thumbnail to watch it, then mark what you want on the Fire Stick.</div>
+  <div class="bar" id="filters"></div>
+</header>
+<main>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>No scenes match.</div>
+</main>
+<footer>
+  <div class="sum" id="sum"></div>
+  <button class="btn" id="reset">Reset</button>
+  <button class="btn primary" id="copy">Copy list for Claude</button>
+</footer>
+
+<dialog id="viewer">
+  <video id="video" controls muted autoplay loop playsinline></video>
+  <div class="vbar">
+    <button class="btn" id="prev" aria-label="Previous">‹</button>
+    <div class="info"><span id="vTitle"></span><small id="vCap"></small></div>
+    <button class="btn" id="vToggle"></button>
+    <button class="btn" id="next" aria-label="Next">›</button>
+    <button class="btn" id="close">Close</button>
+  </div>
+  <div class="note">Preview is Apple's H.264 copy of the clip. The TV plays the same shot as 1080p HEVC. Large files can take a few seconds to start.</div>
+</dialog>
+
+<script>
+const SCENES = /*DATA*/[];
+const KEY = 'aerial-gallery-choices-v1';
+let choices = {};
+try { choices = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(choices)); } catch (e) {} };
+
+SCENES.forEach(s => s.key = s.shot + '|' + (s.tv || ''));
+const wanted = s => s.key in choices ? choices[s.key] : !!s.onTv;
+
+const CATS = ['All', 'On TV', 'Picked', 'Underwater', 'Landscape', 'Cityscape', 'Earth'];
+let filter = 'All', query = '';
+const matches = (s, c) => c === 'All' || (c === 'On TV' ? !!s.onTv : c === 'Picked' ? wanted(s) : s.cat === c);
+
+const filtersEl = document.getElementById('filters');
+function renderFilters() {
+  filtersEl.innerHTML = '';
+  CATS.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.setAttribute('aria-pressed', c === filter);
+    b.innerHTML = c + '<span class="n">' + SCENES.filter(s => matches(s, c)).length + '</span>';
+    b.onclick = () => { filter = c; renderFilters(); renderGrid(); };
+    filtersEl.appendChild(b);
+  });
+  const q = document.createElement('input');
+  q.type = 'search'; q.placeholder = 'Search places…'; q.value = query;
+  q.oninput = () => { query = q.value.toLowerCase(); renderGrid(); };
+  filtersEl.appendChild(q);
+}
+
+function visible() {
+  return SCENES.filter(s => matches(s, filter) &&
+    (!query || (s.label + ' ' + s.caption + ' ' + s.cat).toLowerCase().includes(query)));
+}
+
+function stateClass(s) {
+  const w = wanted(s);
+  return w && !s.onTv ? 'want' : !w && s.onTv ? 'drop' : '';
+}
+function toggleLabel(s) {
+  const w = wanted(s);
+  if (s.onTv) return w ? 'On TV · keep' : 'Will remove';
+  return w ? '✓ Adding' : 'Add to TV';
+}
+function toggle(s) {
+  const next = !wanted(s);
+  if (next === !!s.onTv) delete choices[s.key]; else choices[s.key] = next;
+  save(); renderGrid(); renderSum(); renderFilters();
+  if (viewer.open) syncViewer();
+}
+
+// Some newer scenes have no snapshot on Apple's server: show a frame from the clip instead.
+function frameFallback(thumb, s) {
+  if (!s.preview || thumb.querySelector('video')) return;
+  const v = document.createElement('video');
+  v.muted = true; v.preload = 'metadata'; v.src = s.preview + '#t=20';
+  v.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+  thumb.prepend(v);
+}
+const frameObserver = new IntersectionObserver(entries => entries.forEach(e => {
+  if (e.isIntersecting) { frameObserver.unobserve(e.target); frameFallback(e.target, e.target._scene); }
+}), { rootMargin: '300px' });
+
+const grid = document.getElementById('grid');
+function renderGrid() {
+  const list = visible();
+  grid.innerHTML = '';
+  document.getElementById('empty').hidden = list.length > 0;
+  list.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'card ' + stateClass(s);
+    const thumb = document.createElement('button');
+    thumb.className = 'thumb';
+    thumb.setAttribute('aria-label', 'Play ' + s.label);
+    thumb.innerHTML = (s.onTv ? '<span class="badge tv">ON TV</span>' : '<span class="badge">' + s.cat.toUpperCase() + '</span>') +
+      (s.preview ? '<span class="play">▶</span>' : '');
+    if (s.thumb) {
+      const img = document.createElement('img');
+      img.loading = 'lazy'; img.alt = ''; img.src = s.thumb;
+      img.onerror = () => { img.remove(); frameFallback(thumb, s); };
+      thumb.prepend(img);
+    } else if (s.preview) {
+      frameObserver.observe(thumb);
+      thumb._scene = s;
+    }
+    if (s.preview) thumb.onclick = () => openViewer(s);
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.innerHTML = '<div class="title"></div><div class="cap"></div>';
+    meta.querySelector('.title').textContent = s.onTv && s.onTv !== s.label ? s.onTv : s.label;
+    meta.querySelector('.cap').textContent = s.caption || s.cat;
+    const t = document.createElement('button');
+    t.className = 'toggle';
+    t.textContent = toggleLabel(s);
+    t.onclick = () => toggle(s);
+    if (s.tv) meta.appendChild(t);
+    card.append(thumb, meta);
+    grid.appendChild(card);
+  });
+}
+
+function diff() {
+  return {
+    add: SCENES.filter(s => wanted(s) && !s.onTv),
+    remove: SCENES.filter(s => !wanted(s) && s.onTv),
+    total: SCENES.filter(s => wanted(s) && s.tv).length,
+  };
+}
+function renderSum() {
+  const d = diff();
+  document.getElementById('sum').innerHTML = d.add.length || d.remove.length
+    ? '<b>+' + d.add.length + '</b> to add · <b>−' + d.remove.length + '</b> to remove · TV would have <b>' + d.total + '</b> video scenes'
+    : 'Nothing changed yet. The TV has <b>' + d.total + '</b> video scenes.';
+  document.getElementById('copy').disabled = !(d.add.length || d.remove.length);
+}
+
+document.getElementById('copy').onclick = async () => {
+  const d = diff();
+  const line = s => '- ' + s.label + ' (' + s.shot + ')' + (s.caption ? ': ' + s.caption : '') + '\n  ' + s.tv;
+  let text = 'Update the Calm Home Aerials:\n';
+  if (d.add.length) text += '\nAdd:\n' + d.add.map(line).join('\n') + '\n';
+  if (d.remove.length) text += '\nRemove:\n' + d.remove.map(s => '- ' + s.onTv).join('\n') + '\n';
+  const btn = document.getElementById('copy');
+  try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied ✓'; }
+  catch (e) { prompt('Copy this and paste it to Claude:', text); }
+  setTimeout(() => btn.textContent = 'Copy list for Claude', 1800);
+};
+document.getElementById('reset').onclick = () => {
+  if (!confirm('Clear all your picks?')) return;
+  choices = {}; save(); renderGrid(); renderSum(); renderFilters();
+};
+
+const viewer = document.getElementById('viewer'), video = document.getElementById('video');
+let current = null;
+function openViewer(s) {
+  current = s;
+  video.src = s.preview;
+  syncViewer();
+  if (!viewer.open) viewer.showModal();
+  video.play().catch(() => {});
+}
+function syncViewer() {
+  document.getElementById('vTitle').textContent = current.onTv || current.label;
+  document.getElementById('vCap').textContent = current.caption;
+  const t = document.getElementById('vToggle');
+  t.textContent = toggleLabel(current);
+  t.hidden = !current.tv;
+}
+function step(dir) {
+  const list = visible().filter(s => s.preview);
+  const i = list.indexOf(current);
+  if (list.length) openViewer(list[(i + dir + list.length) % list.length]);
+}
+document.getElementById('vToggle').onclick = () => toggle(current);
+document.getElementById('prev').onclick = () => step(-1);
+document.getElementById('next').onclick = () => step(1);
+document.getElementById('close').onclick = () => viewer.close();
+viewer.addEventListener('close', () => { video.pause(); video.removeAttribute('src'); video.load(); });
+viewer.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') step(1);
+  if (e.key === 'ArrowLeft') step(-1);
+});
+
+renderFilters(); renderGrid(); renderSum();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No key filtering: Fire OS never passes the Home key to accessibility services, and
+     filtering would add a hop to every key press. (A packageNames filter stops all events
+     arriving on Fire OS 8, so the package check is done in HomeGuard instead.)
+     canRetrieveWindowContent is only used to see which app is in front when the guard
+     (re)connects; no screen content is read or stored. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:canRetrieveWindowContent="true"
+    android:notificationTimeout="0"
+    android:description="@string/guard_desc" />
