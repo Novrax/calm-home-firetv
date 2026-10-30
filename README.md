@@ -21,7 +21,7 @@ walks you through the rest. You'll need:
 - about an hour
 
 1. Install the Claude desktop app from [claude.com/download](https://claude.com/download), sign in, and open the **Code** tab.
-2. Pick your **Documents** folder as the folder to work in.
+2. Pick your **Documents**, and create a folder to work in.
 3. Paste this message:
 
    > Please download https://github.com/Novrax/calm-home-firetv into my Documents folder, then read the CLAUDE.md
